@@ -138,3 +138,11 @@ Utiliza el asistente que prefieras: ChatGPT, Google Gemini, Microsoft Copilot, C
 ---
 
 ### 🚀 ¡A por ello!
+
+---
+
+## Entrega — Jainer Samper (JS)
+
+| Carpeta | Documento | Prompts |
+|---------|-------------|---------|
+| [`LTI-JS/`](LTI-JS/) | [`LTI-JS/LTI-JS.md`](LTI-JS/LTI-JS.md) | [`LTI-JS/prompts.md`](LTI-JS/prompts.md) |

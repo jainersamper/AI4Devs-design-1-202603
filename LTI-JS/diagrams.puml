@@ -1,0 +1,164 @@
+' diagrams.puml — LTI-JS (Jainer Samper)
+
+@startuml Candidate_Resume_Submission
+
+left to right direction
+actor Candidate
+actor Recruiter
+
+rectangle "ATS System" {
+    usecase "Upload Resume" as UploadResume
+    usecase "Extract Resume Data (Parsing)" as ParseResume
+    usecase "Validate Parsed Data" as ValidateData
+    usecase "Create Candidate Profile" as CreateProfile
+}
+
+Candidate --> UploadResume
+UploadResume --> ParseResume
+ParseResume --> ValidateData
+ValidateData --> CreateProfile
+CreateProfile --> Recruiter : Profile available for review
+
+@enduml
+
+
+@startuml AI_Candidate_Screening_Ranking
+
+left to right direction
+actor Recruiter
+
+rectangle "ATS System" {
+    usecase "Trigger AI Screening" as TriggerAIScreening
+    usecase "Analyze Candidate Profile & Resume" as AnalyzeProfile
+    usecase "Score & Rank Candidates" as RankCandidates
+    usecase "Review Ranked Candidates" as ReviewCandidates
+}
+
+Recruiter --> TriggerAIScreening
+TriggerAIScreening --> AnalyzeProfile
+AnalyzeProfile --> RankCandidates
+RankCandidates --> ReviewCandidates
+ReviewCandidates --> Recruiter : Access ranked candidate list
+
+@enduml
+
+@startuml Conversational_Chatbot_Screening
+
+left to right direction
+actor Candidate
+actor Recruiter
+
+rectangle "ATS System" {
+    usecase "Initiate Chatbot Session" as StartChatbot
+    usecase "Conduct Initial Screening" as ConductScreening
+    usecase "Answer Candidate Questions" as AnswerQuestions
+    usecase "Generate Screening Report" as GenerateReport
+}
+
+Candidate --> StartChatbot
+StartChatbot --> ConductScreening
+ConductScreening <--> AnswerQuestions
+ConductScreening --> GenerateReport
+GenerateReport --> Recruiter : Review chatbot screening results
+
+@enduml
+
+@startuml C4_Context_ATS
+
+!include <C4/C4_Context>
+
+Person(candidate, "Candidate", "Submits applications and interacts via chatbot")
+Person(recruiter, "Recruiter", "Manages recruitment pipeline and candidate interactions")
+Person(hiringMgr, "Hiring Manager", "Reviews candidates and participates in interviews")
+
+System(ats, "ATS System", "AI-driven applicant tracking system for SMEs")
+
+System_Ext(jobBoards, "External Job Boards", "Job postings and candidate acquisition")
+System_Ext(emailCalendar, "Email & Calendar Services", "Candidate communication and interview scheduling")
+System_Ext(thirdPartyHR, "Third-party HR Systems", "Integration with payroll and onboarding tools")
+
+Rel(candidate, ats, "Applies, interacts via chatbot, schedules interviews")
+Rel(recruiter, ats, "Manages jobs, screens candidates, schedules interviews")
+Rel(hiringMgr, ats, "Reviews candidates, provides feedback")
+
+Rel(ats, jobBoards, "Publishes job postings and receives candidate applications")
+Rel(ats, emailCalendar, "Schedules interviews and sends communications")
+Rel(ats, thirdPartyHR, "Integrates candidate data and onboarding processes")
+
+@enduml
+
+@startuml C4_Container_ATS
+
+!include <C4/C4_Container>
+
+Person(candidate, "Candidate", "Submits resumes and interacts via chatbot")
+Person(recruiter, "Recruiter", "Manages recruitment pipeline and candidate interactions")
+
+System_Boundary(ATS_System, "ATS System") {
+    
+    Container(frontend, "Frontend Web Application", "React SPA", "Allows candidates to apply, recruiters to manage pipeline")
+    Container(apiGateway, "API Gateway", "REST API", "Routes requests and handles authentication")
+    Container(coreService, "Core ATS Service", "Python FastAPI/Django", "Manages candidate data, applications, workflows")
+    Container(aiServices, "AI Microservices", "Python AI Services (Containerized)", "Resume parsing, chatbot, candidate ranking")
+    Container(database, "Database Storage", "AWS RDS PostgreSQL", "Persistent structured data storage")
+    Container(search, "Search Engine", "AWS OpenSearch", "Fast candidate and resume searches")
+    Container(storage, "File Storage", "AWS S3", "Stores resumes and candidate documents")
+}
+
+System_Ext(emailCalendar, "Email & Calendar Services", "Google Workspace, Microsoft 365")
+System_Ext(jobBoards, "External Job Boards", "LinkedIn, Indeed, etc.")
+
+Rel(candidate, frontend, "Applies, interacts via chatbot")
+Rel(recruiter, frontend, "Manages candidates and hiring pipeline")
+
+Rel(frontend, apiGateway, "HTTP(S) requests")
+Rel(apiGateway, coreService, "API calls")
+Rel(coreService, aiServices, "Async events, task requests")
+
+Rel(coreService, database, "Reads from and writes to")
+Rel(coreService, search, "Indexes and queries")
+Rel(coreService, storage, "Stores files")
+
+Rel(aiServices, coreService, "Returns processing results")
+
+Rel(coreService, emailCalendar, "Schedules interviews, sends notifications")
+Rel(coreService, jobBoards, "Publishes jobs, retrieves applications")
+
+@enduml
+
+@startuml C4_AI_Microservices_Component
+
+!include <C4/C4_Component>
+
+Container(aiServices, "AI Microservices", "Python-based AI services running on containers", "Perform AI-driven processing for ATS")
+
+System_Boundary(aiServicesBoundary, "AI Microservices Container") {
+    Component(resumeParser, "Resume Parser", "Python/NLP", "Extracts structured data from candidate resumes")
+    Component(chatbot, "Conversational Chatbot", "Python/NLP", "Handles initial candidate screening and FAQs")
+    Component(candidateRanker, "Candidate Ranking", "Python/ML", "Ranks candidates based on suitability")
+    Component(videoAnalysis, "Video Interview Analyzer", "Python/ML", "Analyzes candidate video interviews")
+    Component(predictiveAnalytics, "Predictive Analytics Engine", "Python/ML", "Predicts candidate fit and hiring outcomes")
+}
+
+Container(coreService, "Core ATS Service", "Python FastAPI/Django", "Manages candidate data, workflows, and orchestrates AI tasks")
+ContainerDb(database, "Database", "PostgreSQL RDS", "Persistent structured data storage")
+Container(searchEngine, "Search Engine", "AWS OpenSearch", "Fast indexing and searching of candidate data")
+Container(storage, "File Storage", "AWS S3", "Storage of resumes and candidate files")
+
+Rel(coreService, resumeParser, "Send resumes for parsing")
+Rel(coreService, chatbot, "Initiate chatbot interactions")
+Rel(coreService, candidateRanker, "Request candidate rankings")
+Rel(coreService, videoAnalysis, "Request video analysis")
+Rel(coreService, predictiveAnalytics, "Request predictions")
+
+Rel(resumeParser, coreService, "Return structured resume data")
+Rel(chatbot, coreService, "Return screening results")
+Rel(candidateRanker, coreService, "Return candidate rankings")
+Rel(videoAnalysis, coreService, "Return analysis results")
+Rel(predictiveAnalytics, coreService, "Return predictive insights")
+
+Rel(resumeParser, searchEngine, "Index parsed data")
+Rel(resumeParser, database, "Store structured data")
+Rel(resumeParser, storage, "Retrieve resume files")
+
+@enduml
